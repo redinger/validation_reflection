@@ -1,0 +1,26 @@
+Validation Reflection
+=====================
+
+Version 0.2, 2006-08-06
+
+This plugin adds reflective access to validations
+
+ - ModelClass.reflect_on_all_validations
+ - ModelClass.reflect_on_validations_for(:property)
+
+
+= Deprecation Notice
+
+Version 0.1 had supplied three methods
+
+ - validates_presence_of_mandatory_content_columns
+ - validates_lengths_of_string_attributes
+ - validates_all_associated
+  
+These have been removed. Please use the Enforce Schema Rules plugin instead
+
+  http://enforce-schema-rules.googlecode.com/svn/trunk/enforce_schema_rules/
+
+
+
+Copyright (c) 2006, Michael Schuerig, michael@schuerig.de
