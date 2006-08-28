@@ -1,6 +1,6 @@
 author: Michael Schuerig
 summary: Reflection on validations
-homepage: 
+homepage: http://rubyforge.org/projects/valirefl/validation_reflection/trunk
 plugin: validation_reflection
 license: MIT
 version: 0.2
