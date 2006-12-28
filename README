@@ -1,6 +1,11 @@
 Validation Reflection
 =====================
 
+Version 0.2.1, 2006-12-28
+
+Moved lib files into subfolder boiler_plate.
+
+
 Version 0.2, 2006-08-06
 
 This plugin adds reflective access to validations

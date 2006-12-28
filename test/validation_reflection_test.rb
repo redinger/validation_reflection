@@ -3,7 +3,7 @@ $:.unshift File.join(File.dirname(__FILE__))
 $:.unshift File.join(File.dirname(__FILE__), '/../lib')
 
 require 'test_helper'
-require 'validation_reflection'
+require 'boiler_plate/validation_reflection'
 
 
 ActiveRecord::Base.class_eval do
