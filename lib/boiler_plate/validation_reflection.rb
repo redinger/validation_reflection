@@ -1,5 +1,5 @@
 #--
-# Copyright (c) 2006, Michael Schuerig, michael@schuerig.de
+# Copyright (c) 2006, 2007, Michael Schuerig, michael@schuerig.de
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
@@ -29,7 +29,10 @@ require 'active_record/reflection'
 module BoilerPlate # :nodoc:
   module ActiveRecordExtensions # :nodoc:
     module ValidationReflection # :nodoc:
-      VALIDATIONS = %w(
+      CONFIG_PATH = File.join(RAILS_ROOT, 'config', 'plugins', 'validation_reflection.rb')
+      
+      mattr_accessor :reflected_validations
+      BoilerPlate::ActiveRecordExtensions::ValidationReflection.reflected_validations = %w(
          validates_acceptance_of
          validates_associated
          validates_confirmation_of
@@ -40,26 +43,37 @@ module BoilerPlate # :nodoc:
          validates_numericality_of
          validates_presence_of
          validates_uniqueness_of
-      ).freeze
+      )
 
       def self.included(base)
         return if base.kind_of? BoilerPlate::ActiveRecordExtensions::ValidationReflection::ClassMethods
         base.extend(ClassMethods)
+      end
 
-        for validation_type in VALIDATIONS
-          base.module_eval <<-"end_eval"
+      def self.load_config
+        if File.file?(CONFIG_PATH)
+          config = OpenStruct.new
+          config.reflected_validations = reflected_validations
+          silence_warnings do
+            eval(IO.read(CONFIG_PATH), binding, CONFIG_PATH)
+          end
+        end
+      end
+
+      def self.install(base)
+        reflected_validations.freeze
+        reflected_validations.each do |validation_type|
+          base.class_eval <<-"end_eval"
             class << self
-              alias_method :#{validation_type}_without_reflection, :#{validation_type}
-
               def #{validation_type}_with_reflection(*attr_names)
                 #{validation_type}_without_reflection(*attr_names)
-                configuration = attr_names.last.is_a?(Hash) ? attr_names.pop : nil
-                for attr_name in attr_names
-                  write_inheritable_array "validations", [ ActiveRecord::Reflection::MacroReflection.new(:#{validation_type}, attr_name, configuration, self) ]
+                configuration = attr_names.last.is_a?(Hash) ? attr_names.pop : {}
+                attr_names.each do |attr_name|
+                  write_inheritable_array :validations, [ ActiveRecord::Reflection::MacroReflection.new(:#{validation_type}, attr_name.to_sym, configuration, self) ]
                 end
               end
 
-              alias_method :#{validation_type}, :#{validation_type}_with_reflection
+              alias_method_chain :#{validation_type}, :reflection
             end
           end_eval
         end
@@ -69,13 +83,14 @@ module BoilerPlate # :nodoc:
 
         # Returns an array of MacroReflection objects for all validations in the class
         def reflect_on_all_validations
-          read_inheritable_attribute("validations") || []
+          read_inheritable_attribute(:validations) || []
         end
 
-        # Returns an array of MacroReflection objects for all validations defined for the field +attr_name+ (expects a symbol)
+        # Returns an array of MacroReflection objects for all validations defined for the field +attr_name+.
         def reflect_on_validations_for(attr_name)
-          reflect_on_all_validations.find_all do |reflection|
-            reflection.name.to_s == attr_name.to_s
+          attr_name = attr_name.to_sym
+          reflect_on_all_validations.select do |reflection|
+            reflection.name == attr_name
           end
         end
 

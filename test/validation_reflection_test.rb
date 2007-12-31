@@ -3,12 +3,20 @@ $:.unshift File.join(File.dirname(__FILE__))
 $:.unshift File.join(File.dirname(__FILE__), '/../lib')
 
 require 'test_helper'
-require 'boiler_plate/validation_reflection'
 
+ActiveRecord::Base.class_eval do
+  def self.validates_something_weird(col)
+  end
+end
+
+require 'boiler_plate/validation_reflection'
 
 ActiveRecord::Base.class_eval do
   include BoilerPlate::ActiveRecordExtensions::ValidationReflection
+  BoilerPlate::ActiveRecordExtensions::ValidationReflection.reflected_validations << :validates_something_weird
+  BoilerPlate::ActiveRecordExtensions::ValidationReflection.install(self)
 end
+
 
 class ValidationReflectionTest < Test::Unit::TestCase
 
@@ -28,7 +36,8 @@ class ValidationReflectionTest < Test::Unit::TestCase
          create_fake_column('col2', false, 100),
          create_fake_column('col3'),
          create_fake_column('col4'),
-         create_fake_column('col5')
+         create_fake_column('col5'),
+         create_fake_column('col6')
         ]
       end
     end
@@ -39,7 +48,8 @@ class ValidationReflectionTest < Test::Unit::TestCase
     validates_length_of :col2, :maximum => 100
     validates_format_of :col3, :with => /^([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})$/i
     validates_numericality_of :col4, :only_integer => true
-    validates_numericality_of :col5
+    validates_numericality_of :col5, :less_than => 5
+    validates_something_weird :col6
   end
 
 
@@ -73,4 +83,14 @@ class ValidationReflectionTest < Test::Unit::TestCase
     assert refls.any? { |r| r.macro == :validates_numericality_of }
   end
   
+  def test_validation_options_are_reflected
+    refls = Dummy.reflect_on_validations_for(:col5)
+    refl = refls[0]
+    assert_equal 5, refl.options[:less_than]
+  end
+
+  def test_custom_validations_are_reflected
+    refls = Dummy.reflect_on_validations_for(:col6)
+    assert refls.any? { |r| r.macro == :validates_something_weird }
+  end
 end

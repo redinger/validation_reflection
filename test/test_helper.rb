@@ -17,6 +17,8 @@ require 'action_controller'
 require 'action_controller/assertions'
 require 'html/document'
 
+require 'ruby-debug'
+
 RAILS_DEFAULT_LOGGER = Logger.new(STDERR)
 ### TODO why is this necessary?
 ActionController::Base.logger = RAILS_DEFAULT_LOGGER
