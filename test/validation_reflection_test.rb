@@ -5,7 +5,15 @@ $:.unshift File.join(File.dirname(__FILE__), '/../lib')
 require 'test_helper'
 
 ActiveRecord::Base.class_eval do
-  def self.validates_something_weird(col)
+  def self.validates_something_weird(*cols)
+    cols.each do |col|
+      validates_format_of col, :with => /weird/
+    end
+  end
+  def self.validates_something_selfcontained(*cols)
+    cols.each do |col|
+      validates_format_of col, :with => /blablabla/
+    end
   end
 end
 
@@ -14,6 +22,10 @@ require 'boiler_plate/validation_reflection'
 ActiveRecord::Base.class_eval do
   include BoilerPlate::ActiveRecordExtensions::ValidationReflection
   BoilerPlate::ActiveRecordExtensions::ValidationReflection.reflected_validations << :validates_something_weird
+  BoilerPlate::ActiveRecordExtensions::ValidationReflection.reflected_validations << {
+    :method => :validates_something_selfcontained,
+    :ignore_subvalidations => true
+  }
   BoilerPlate::ActiveRecordExtensions::ValidationReflection.install(self)
 end
 
@@ -37,7 +49,8 @@ class ValidationReflectionTest < Test::Unit::TestCase
          create_fake_column('col3'),
          create_fake_column('col4'),
          create_fake_column('col5'),
-         create_fake_column('col6')
+         create_fake_column('col6'),
+         create_fake_column('col7')
         ]
       end
     end
@@ -50,6 +63,7 @@ class ValidationReflectionTest < Test::Unit::TestCase
     validates_numericality_of :col4, :only_integer => true
     validates_numericality_of :col5, :less_than => 5
     validates_something_weird :col6
+    validates_something_selfcontained :col7
   end
 
 
@@ -92,5 +106,21 @@ class ValidationReflectionTest < Test::Unit::TestCase
   def test_custom_validations_are_reflected
     refls = Dummy.reflect_on_validations_for(:col6)
     assert refls.any? { |r| r.macro == :validates_something_weird }
+    assert refls.any? { |r| r.macro == :validates_format_of }
+  end
+
+  def test_custom_validations_with_options_are_reflected
+    refls = Dummy.reflect_on_validations_for(:col7)
+    assert refls.any? { |r| r.macro == :validates_something_selfcontained }
+  end
+
+  def test_subvalidations_are_reflected
+    refls = Dummy.reflect_on_validations_for(:col6)
+    assert_equal 2, refls.size
+  end
+
+  def test_ignored_subvalidations_are_not_reflected
+    refls = Dummy.reflect_on_validations_for(:col7)
+    assert_equal 1, refls.size
   end
 end

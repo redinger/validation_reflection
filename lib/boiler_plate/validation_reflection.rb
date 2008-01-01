@@ -1,5 +1,5 @@
 #--
-# Copyright (c) 2006, 2007, Michael Schuerig, michael@schuerig.de
+# Copyright (c) 2006-2008, Michael Schuerig, michael@schuerig.de
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
@@ -45,8 +45,11 @@ module BoilerPlate # :nodoc:
          validates_uniqueness_of
       )
 
+      mattr_accessor :in_ignored_subvalidation
+      BoilerPlate::ActiveRecordExtensions::ValidationReflection.in_ignored_subvalidation = false
+      
       def self.included(base)
-        return if base.kind_of? BoilerPlate::ActiveRecordExtensions::ValidationReflection::ClassMethods
+        return if base.kind_of?(BoilerPlate::ActiveRecordExtensions::ValidationReflection::ClassMethods)
         base.extend(ClassMethods)
       end
 
@@ -63,13 +66,17 @@ module BoilerPlate # :nodoc:
       def self.install(base)
         reflected_validations.freeze
         reflected_validations.each do |validation_type|
+          ignore_subvalidations = false
+          if validation_type.kind_of?(Hash)
+            ignore_subvalidations = validation_type[:ignore_subvalidations]
+            validation_type = validation_type[:method]
+          end
           base.class_eval <<-"end_eval"
             class << self
               def #{validation_type}_with_reflection(*attr_names)
-                #{validation_type}_without_reflection(*attr_names)
-                configuration = attr_names.last.is_a?(Hash) ? attr_names.pop : {}
-                attr_names.each do |attr_name|
-                  write_inheritable_array :validations, [ ActiveRecord::Reflection::MacroReflection.new(:#{validation_type}, attr_name.to_sym, configuration, self) ]
+                ignoring_subvalidations(#{ignore_subvalidations}) do
+                  #{validation_type}_without_reflection(*attr_names)
+                  remember_validation_metadata(:#{validation_type}, *attr_names)
                 end
               end
 
@@ -94,6 +101,25 @@ module BoilerPlate # :nodoc:
           end
         end
 
+        private
+        
+        def remember_validation_metadata(validation_type, *attr_names)
+          configuration = attr_names.last.is_a?(Hash) ? attr_names.pop : {}
+          attr_names.each do |attr_name|
+            write_inheritable_array :validations,
+              [ ActiveRecord::Reflection::MacroReflection.new(validation_type, attr_name.to_sym, configuration, self) ]
+          end
+        end
+        
+        def ignoring_subvalidations(ignore)
+          save_ignore = BoilerPlate::ActiveRecordExtensions::ValidationReflection.in_ignored_subvalidation
+          unless BoilerPlate::ActiveRecordExtensions::ValidationReflection.in_ignored_subvalidation
+            BoilerPlate::ActiveRecordExtensions::ValidationReflection.in_ignored_subvalidation = ignore
+            yield
+          end
+        ensure
+          BoilerPlate::ActiveRecordExtensions::ValidationReflection.in_ignored_subvalidation = save_ignore
+        end
       end
 
     end

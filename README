@@ -1,20 +1,45 @@
 Validation Reflection
 =====================
 
-Version 0.2.1, 2006-12-28
-
-Moved lib files into subfolder boiler_plate.
-
-
-Version 0.2, 2006-08-06
-
 This plugin adds reflective access to validations
 
  - ModelClass.reflect_on_all_validations
  - ModelClass.reflect_on_validations_for(:property)
 
+Usually, all the standard Rails validations are reflected.
+You can change this, add or remove validations, in an application-
+specific configuration file, 
 
-= Deprecation Notice
+  config/plugins/validation_reflection.rb
+
+In that file change config.reflected_validations to suit your
+needs. Say, you have a custom validation for email addresses,
+validates_as_email, then you could add it like this
+
+  config.reflected_validations << :validates_as_email
+
+If validates_as_email is implemented in terms of other validation
+methods, these validations are added to the reflection metadata,
+too. As that may not be what you want, you can disable reflection
+for these subordinate validations
+
+  config.reflected_validations << {
+  	:method => :validates_as_email,
+  	:ignore_subvalidations => true
+  }
+
+
+== Changes
+=== 0.3, 2008-01-01
+Added configurability in config/plugins/validation_reflection.rb
+
+=== 0.2.1, 2006-12-28
+Moved lib files into subfolder boiler_plate.
+
+=== 0.2, 2006-08-06
+
+
+== Deprecation Notice
 
 Version 0.1 had supplied three methods
 
@@ -28,4 +53,4 @@ These have been removed. Please use the Enforce Schema Rules plugin instead
 
 
 
-Copyright (c) 2006, Michael Schuerig, michael@schuerig.de
+Copyright (c) 2006-2008, Michael Schuerig, michael@schuerig.de
