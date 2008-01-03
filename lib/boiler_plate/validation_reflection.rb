@@ -23,6 +23,7 @@
 
 
 require 'active_record/reflection'
+require 'ostruct'
 
 # Based on code by Sebastian Kanthak
 # See http://dev.rubyonrails.org/ticket/861
