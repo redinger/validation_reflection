@@ -67,6 +67,7 @@ module BoilerPlate # :nodoc:
       def self.install(base)
         reflected_validations.freeze
         reflected_validations.each do |validation_type|
+          next if base.respond_to?("#{validation_type}_with_reflection")
           ignore_subvalidations = false
           if validation_type.kind_of?(Hash)
             ignore_subvalidations = validation_type[:ignore_subvalidations]
