@@ -1,3 +1,5 @@
+== 0.3.2, 2009-09-12
+* gemified by Christopher Redinger
 
 == 0.3.1, 2008-01-03
 * require 'ostruct'; thanks to Georg Friedrich.

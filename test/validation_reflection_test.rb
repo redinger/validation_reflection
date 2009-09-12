@@ -1,7 +1,3 @@
-
-$:.unshift File.join(File.dirname(__FILE__))
-$:.unshift File.join(File.dirname(__FILE__), '/../lib')
-
 require 'test_helper'
 
 ActiveRecord::Base.class_eval do
@@ -17,16 +13,16 @@ ActiveRecord::Base.class_eval do
   end
 end
 
-require 'boiler_plate/validation_reflection'
+require 'validation_reflection'
 
 ActiveRecord::Base.class_eval do
-  include BoilerPlate::ActiveRecordExtensions::ValidationReflection
-  BoilerPlate::ActiveRecordExtensions::ValidationReflection.reflected_validations << :validates_something_weird
-  BoilerPlate::ActiveRecordExtensions::ValidationReflection.reflected_validations << {
+  include ActiveRecordExtensions::ValidationReflection
+  ActiveRecordExtensions::ValidationReflection.reflected_validations << :validates_something_weird
+  ActiveRecordExtensions::ValidationReflection.reflected_validations << {
     :method => :validates_something_selfcontained,
     :ignore_subvalidations => true
   }
-  BoilerPlate::ActiveRecordExtensions::ValidationReflection.install(self)
+  ActiveRecordExtensions::ValidationReflection.install(self)
 end
 
 
