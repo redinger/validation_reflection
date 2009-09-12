@@ -26,7 +26,8 @@ Gem::Specification.new do |s|
      "lib/validation_reflection.rb",
      "rails/init.rb",
      "test/test_helper.rb",
-     "test/validation_reflection_test.rb"
+     "test/validation_reflection_test.rb",
+     "validation_reflection.gemspec"
   ]
   s.homepage = %q{http://github.com/redinger/validation_reflection}
   s.rdoc_options = ["--charset=UTF-8"]
