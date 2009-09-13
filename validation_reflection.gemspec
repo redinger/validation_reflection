@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{validation_reflection}
-  s.version = "0.3.2"
+  s.version = "0.3.3"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Christopher Redinger"]
@@ -27,7 +27,6 @@ Gem::Specification.new do |s|
      "rails/init.rb",
      "test/test_helper.rb",
      "test/validation_reflection_test.rb",
-     "validation_reflection-0.3.2.gem",
      "validation_reflection.gemspec"
   ]
   s.homepage = %q{http://github.com/redinger/validation_reflection}
