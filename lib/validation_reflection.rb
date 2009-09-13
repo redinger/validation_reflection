@@ -122,6 +122,11 @@ module ActiveRecordExtensions # :nodoc:
         ActiveRecordExtensions::ValidationReflection.in_ignored_subvalidation = save_ignore
       end
     end
-
   end
+end
+
+ActiveRecord::Base.class_eval do
+  include ActiveRecordExtensions::ValidationReflection
+  ActiveRecordExtensions::ValidationReflection.load_config
+  ActiveRecordExtensions::ValidationReflection.install(self)
 end

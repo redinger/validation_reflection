@@ -27,6 +27,7 @@ Gem::Specification.new do |s|
      "rails/init.rb",
      "test/test_helper.rb",
      "test/validation_reflection_test.rb",
+     "validation_reflection-0.3.2.gem",
      "validation_reflection.gemspec"
   ]
   s.homepage = %q{http://github.com/redinger/validation_reflection}
