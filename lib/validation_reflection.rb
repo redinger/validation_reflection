@@ -31,7 +31,7 @@ module ActiveRecordExtensions # :nodoc:
 
     extend self
 
-    CONFIG_PATH = ::File.join(RAILS_ROOT, 'config', 'plugins', 'validation_reflection.rb')
+    CONFIG_PATH = ::Dir.glob((::File.join(RAILS_ROOT, 'config', '**', 'validation_reflection.rb').to_s rescue '')).first || ''
 
     @@reflected_validations = [
        :validates_acceptance_of,
