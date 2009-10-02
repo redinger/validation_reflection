@@ -53,7 +53,7 @@ module ActiveRecordExtensions # :nodoc:
     mattr_accessor  :reflected_validations,
                     :in_ignored_subvalidation
 
-    def included(base)
+    def included(base) # :nodoc:
       return if base.kind_of?(::ActiveRecordExtensions::ValidationReflection::ClassMethods)
       base.extend(ClassMethods)
     end
@@ -76,7 +76,7 @@ module ActiveRecordExtensions # :nodoc:
     #
     def install(base)
       @@reflected_validations.each do |validation_type|
-        next if base.respond_to?("#{validation_type}_with_reflection")
+        next if base.respond_to?(:"#{validation_type}_with_reflection")
         ignore_subvalidations = false
         
         if validation_type.kind_of?(::Hash)
@@ -105,14 +105,13 @@ module ActiveRecordExtensions # :nodoc:
 
       # Returns an array of MacroReflection objects for all validations in the class
       def reflect_on_all_validations
-        read_inheritable_attribute(:validations) || []
+        self.read_inheritable_attribute(:validations) || []
       end
 
       # Returns an array of MacroReflection objects for all validations defined for the field +attr_name+.
       def reflect_on_validations_for(attr_name)
-        attr_name = attr_name.to_sym
         self.reflect_on_all_validations.select do |reflection|
-          reflection.name == attr_name
+          reflection.name == attr_name.to_sym
         end
       end
 
