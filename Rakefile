@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'rake'
 require 'rake/testtask'
 require 'rake/rdoctask'
@@ -22,7 +23,12 @@ Rake::RDocTask.new(:rdoc) do |rdoc|
 end
 
 begin
-  require 'jeweler'
+  begin
+    require 'jeweler'
+  rescue LoadError
+    gem 'technicalpickles-jeweler', '>= 1.0.0'
+    require 'jeweler'
+  end
   Jeweler::Tasks.new do |gemspec|
     gemspec.name = "validation_reflection"
     gemspec.summary = "Adds reflective access to validations"

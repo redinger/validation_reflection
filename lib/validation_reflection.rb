@@ -1,3 +1,4 @@
+# encoding: utf-8
 #--
 # Copyright (c) 2006-2008, Michael Schuerig, michael@schuerig.de
 #
@@ -58,7 +59,7 @@ module ActiveRecordExtensions # :nodoc:
     def load_config
       if ::File.file?(CONFIG_PATH)
         config = ::OpenStruct.new
-        config.reflected_validations = reflected_validations
+        config.reflected_validations = @@reflected_validations
         silence_warnings do
           eval(::IO.read(CONFIG_PATH), binding, CONFIG_PATH)
         end
@@ -109,7 +110,9 @@ module ActiveRecordExtensions # :nodoc:
       end
 
       private
-        
+
+        # Store validation info for easy and fast access.
+        #
         def remember_validation_metadata(validation_type, *attr_names)
           configuration = attr_names.last.is_a?(::Hash) ? attr_names.pop : {}
           attr_names.each do |attr_name|
@@ -117,17 +120,17 @@ module ActiveRecordExtensions # :nodoc:
               [::ActiveRecord::Reflection::MacroReflection.new(validation_type, attr_name.to_sym, configuration, self)]
           end
         end
-        
+
         def ignoring_subvalidations(ignore)
           save_ignore = self.in_ignored_subvalidation
-          unless in_ignored_subvalidation
+          unless self.in_ignored_subvalidation
             self.in_ignored_subvalidation = ignore
             yield
           end
         ensure
           self.in_ignored_subvalidation = save_ignore
         end
-        
+
     end
   end
 end
