@@ -27,51 +27,58 @@ require 'ostruct'
 
 # Based on code by Sebastian Kanthak
 # See http://dev.rubyonrails.org/ticket/861
+#
 module ActiveRecordExtensions # :nodoc:
   module ValidationReflection # :nodoc:
-    CONFIG_PATH = File.join(RAILS_ROOT, 'config', 'plugins', 'validation_reflection.rb')
-    
-    mattr_accessor :reflected_validations
-    ActiveRecordExtensions::ValidationReflection.reflected_validations = %w(
-       validates_acceptance_of
-       validates_associated
-       validates_confirmation_of
-       validates_exclusion_of
-       validates_format_of
-       validates_inclusion_of
-       validates_length_of
-       validates_numericality_of
-       validates_presence_of
-       validates_uniqueness_of
-    )
 
-    mattr_accessor :in_ignored_subvalidation
-    ActiveRecordExtensions::ValidationReflection.in_ignored_subvalidation = false
-    
-    def self.included(base)
-      return if base.kind_of?(ActiveRecordExtensions::ValidationReflection::ClassMethods)
+    extend self
+
+    CONFIG_PATH = ::File.join(RAILS_ROOT, 'config', 'plugins', 'validation_reflection.rb')
+
+    @@reflected_validations = [
+       :validates_acceptance_of,
+       :validates_associated,
+       :validates_confirmation_of,
+       :validates_exclusion_of,
+       :validates_format_of,
+       :validates_inclusion_of,
+       :validates_length_of,
+       :validates_numericality_of,
+       :validates_presence_of,
+       :validates_uniqueness_of,
+     ]
+    @@in_ignored_subvalidation = false
+
+    mattr_accessor  :reflected_validations,
+                    :in_ignored_subvalidation
+
+    def included(base)
+      return if base.kind_of?(::ActiveRecordExtensions::ValidationReflection::ClassMethods)
       base.extend(ClassMethods)
     end
 
-    def self.load_config
-      if File.file?(CONFIG_PATH)
-        config = OpenStruct.new
+    def load_config
+      if ::File.file?(CONFIG_PATH)
+        config = ::OpenStruct.new
         config.reflected_validations = reflected_validations
         silence_warnings do
-          eval(IO.read(CONFIG_PATH), binding, CONFIG_PATH)
+          eval(::IO.read(CONFIG_PATH), binding, CONFIG_PATH)
         end
       end
     end
 
-    def self.install(base)
-      reflected_validations.freeze
-      reflected_validations.each do |validation_type|
+    def install(base)
+      #@@reflected_validations.freeze
+      
+      @@reflected_validations.each do |validation_type|
         next if base.respond_to?("#{validation_type}_with_reflection")
         ignore_subvalidations = false
+        
         if validation_type.kind_of?(Hash)
           ignore_subvalidations = validation_type[:ignore_subvalidations]
           validation_type = validation_type[:method]
         end
+        
         base.class_eval <<-"end_eval"
           class << self
             def #{validation_type}_with_reflection(*attr_names)
@@ -89,6 +96,8 @@ module ActiveRecordExtensions # :nodoc:
 
     module ClassMethods
 
+      include ::ActiveRecordExtensions::ValidationReflection
+
       # Returns an array of MacroReflection objects for all validations in the class
       def reflect_on_all_validations
         read_inheritable_attribute(:validations) || []
@@ -97,36 +106,37 @@ module ActiveRecordExtensions # :nodoc:
       # Returns an array of MacroReflection objects for all validations defined for the field +attr_name+.
       def reflect_on_validations_for(attr_name)
         attr_name = attr_name.to_sym
-        reflect_on_all_validations.select do |reflection|
+        self.reflect_on_all_validations.select do |reflection|
           reflection.name == attr_name
         end
       end
 
       private
-      
-      def remember_validation_metadata(validation_type, *attr_names)
-        configuration = attr_names.last.is_a?(Hash) ? attr_names.pop : {}
-        attr_names.each do |attr_name|
-          write_inheritable_array :validations,
-            [ ActiveRecord::Reflection::MacroReflection.new(validation_type, attr_name.to_sym, configuration, self) ]
+        
+        def remember_validation_metadata(validation_type, *attr_names)
+          configuration = attr_names.last.is_a?(::Hash) ? attr_names.pop : {}
+          attr_names.each do |attr_name|
+            self.write_inheritable_array :validations,
+              [::ActiveRecord::Reflection::MacroReflection.new(validation_type, attr_name.to_sym, configuration, self)]
+          end
         end
-      end
-      
-      def ignoring_subvalidations(ignore)
-        save_ignore = ActiveRecordExtensions::ValidationReflection.in_ignored_subvalidation
-        unless ActiveRecordExtensions::ValidationReflection.in_ignored_subvalidation
-          ActiveRecordExtensions::ValidationReflection.in_ignored_subvalidation = ignore
-          yield
+        
+        def ignoring_subvalidations(ignore)
+          save_ignore = self.in_ignored_subvalidation
+          unless in_ignored_subvalidation
+            self.in_ignored_subvalidation = ignore
+            yield
+          end
+        ensure
+          self.in_ignored_subvalidation = save_ignore
         end
-      ensure
-        ActiveRecordExtensions::ValidationReflection.in_ignored_subvalidation = save_ignore
-      end
+        
     end
   end
 end
 
 ActiveRecord::Base.class_eval do
-  include ActiveRecordExtensions::ValidationReflection
-  ActiveRecordExtensions::ValidationReflection.load_config
-  ActiveRecordExtensions::ValidationReflection.install(self)
+  include ::ActiveRecordExtensions::ValidationReflection
+  ::ActiveRecordExtensions::ValidationReflection.load_config
+  ::ActiveRecordExtensions::ValidationReflection.install(self)
 end
