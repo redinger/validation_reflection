@@ -20,8 +20,6 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #++
-
-
 require 'active_record/reflection'
 require 'ostruct'
 
@@ -68,18 +66,18 @@ module ActiveRecordExtensions # :nodoc:
     end
 
     def install(base)
-      #@@reflected_validations.freeze
-      
+      @@reflected_validations.freeze
+
       @@reflected_validations.each do |validation_type|
         next if base.respond_to?("#{validation_type}_with_reflection")
         ignore_subvalidations = false
         
-        if validation_type.kind_of?(Hash)
+        if validation_type.kind_of?(::Hash)
           ignore_subvalidations = validation_type[:ignore_subvalidations]
           validation_type = validation_type[:method]
         end
         
-        base.class_eval <<-"end_eval"
+        base.class_eval %{
           class << self
             def #{validation_type}_with_reflection(*attr_names)
               ignoring_subvalidations(#{ignore_subvalidations}) do
@@ -87,10 +85,9 @@ module ActiveRecordExtensions # :nodoc:
                 remember_validation_metadata(:#{validation_type}, *attr_names)
               end
             end
-
             alias_method_chain :#{validation_type}, :reflection
           end
-        end_eval
+        }, __FILE__, __LINE__
       end
     end
 
