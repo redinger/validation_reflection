@@ -32,9 +32,9 @@ module ActiveRecordExtensions # :nodoc:
 
     extend self
 
+    # Look for config/initalizer here in:
     CONFIG_PATH = ::Dir.glob((::File.join(RAILS_ROOT, 'config', '**', 'validation_reflection.rb').to_s rescue '')).first || ''
-
-    @@reflected_validations = [
+    CORE_VALIDATONS = [
        :validates_acceptance_of,
        :validates_associated,
        :validates_confirmation_of,
@@ -45,7 +45,9 @@ module ActiveRecordExtensions # :nodoc:
        :validates_numericality_of,
        :validates_presence_of,
        :validates_uniqueness_of,
-     ]
+     ].freeze
+     
+    @@reflected_validations = CORE_VALIDATONS.dup
     @@in_ignored_subvalidation = false
 
     mattr_accessor  :reflected_validations,
@@ -56,6 +58,9 @@ module ActiveRecordExtensions # :nodoc:
       base.extend(ClassMethods)
     end
 
+    # Load config/initializer on load, where ValidationReflection defaults
+    # (such as which validations to reflect upon) cane be overridden/extended.
+    #
     def load_config
       if ::File.file?(CONFIG_PATH)
         config = ::OpenStruct.new
@@ -66,9 +71,10 @@ module ActiveRecordExtensions # :nodoc:
       end
     end
 
+    # Iterate through all validations and store/cache the info
+    # for later easy access.
+    #
     def install(base)
-      @@reflected_validations.freeze
-
       @@reflected_validations.each do |validation_type|
         next if base.respond_to?("#{validation_type}_with_reflection")
         ignore_subvalidations = false
@@ -91,6 +97,7 @@ module ActiveRecordExtensions # :nodoc:
         }, __FILE__, __LINE__
       end
     end
+    alias :reload :install
 
     module ClassMethods
 
