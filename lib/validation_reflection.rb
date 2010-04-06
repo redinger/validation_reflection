@@ -32,8 +32,10 @@ module ActiveRecordExtensions # :nodoc:
 
     extend self
 
-    # Look for config/initalizer here in:
-    CONFIG_PATH = ::Dir.glob((::File.join(RAILS_ROOT, 'config', '**', 'validation_reflection.rb').to_s rescue '')).first || ''
+    require_path = ::File.join((defined?(Rails) ? Rails.root : RAILS_ROOT), 'config', '**', 'validation_reflection.rb').to_s rescue ''
+
+    # Look for config/initializer here in:
+    CONFIG_PATH = ::Dir.glob(require_path).first || ''
     CORE_VALIDATONS = [
        :validates_acceptance_of,
        :validates_associated,
