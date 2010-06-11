@@ -101,7 +101,7 @@ module ValidationReflection # :nodoc:
   end
 end
 
-ActiveRecord::Base.class_eval do
-  include ::ValidationReflection
+ActiveSupport.on_load(:active_record) do
+  include ValidationReflection
   ::ValidationReflection.install(self)
 end
