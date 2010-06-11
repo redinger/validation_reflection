@@ -1,7 +1,7 @@
 Validation Reflection
 =====================
 
-Version 0.3.6, 2010-02-14
+Version 0.3.7, 2010-06-11
 
 This plugin adds reflective access to validations
 
@@ -59,6 +59,10 @@ configuration using
   config.plugins = [...]
 
 
+== Special Thanks
 
+To Michael Schuerig, michael@schuerig.de for his initial concept and implementation of this plugin.
 
-Copyright (c) 2006-2008, Michael Schuerig, michael@schuerig.de
+== License
+
+ValidationReflection uses the MIT license. Please check the LICENSE file for more details.
