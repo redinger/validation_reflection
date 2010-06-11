@@ -1,3 +1,7 @@
+== 0.3.7 2010-06-11
+* Enhancement from Sutto:
+  ** Use Rails.root if available over RAILS_ROOT
+
 == 0.3.6 2010-02-14
 * Enhancement from skoppensboer:
   ** Changes Jeweler spec to reflect only Gemcutter
