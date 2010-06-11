@@ -17,13 +17,13 @@ end
 require 'validation_reflection'
 
 ActiveRecord::Base.class_eval do
-  include ::ActiveRecordExtensions::ValidationReflection
-  ::ActiveRecordExtensions::ValidationReflection.reflected_validations << :validates_something_weird
-  ::ActiveRecordExtensions::ValidationReflection.reflected_validations << {
+  include ValidationReflection
+  ::ValidationReflection.reflected_validations << :validates_something_weird
+  ::ValidationReflection.reflected_validations << {
       :method => :validates_something_selfcontained,
       :ignore_subvalidations => true
     }
-  ::ActiveRecordExtensions::ValidationReflection.install(self)
+  ::ValidationReflection.install(self)
 end
 
 
