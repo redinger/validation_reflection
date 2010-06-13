@@ -1,3 +1,6 @@
+== 1.0.0-beta4 2010-06-12
+* Changed initialization to reflect new initialization in Rails 3.
+
 == 0.3.7 2010-06-11
 * Enhancement from Sutto:
   ** Use Rails.root if available over RAILS_ROOT
