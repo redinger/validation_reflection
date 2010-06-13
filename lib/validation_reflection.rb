@@ -1,9 +1,5 @@
-require 'active_record/reflection'
 require 'ostruct'
 
-# Based on code by Sebastian Kanthak
-# See http://dev.rubyonrails.org/ticket/861
-#
 module ValidationReflection # :nodoc:
 
   extend self
@@ -22,6 +18,7 @@ module ValidationReflection # :nodoc:
    ].freeze
    
   @@reflected_validations = CORE_VALIDATONS.dup
+  
   @@in_ignored_subvalidation = false
 
   mattr_accessor  :reflected_validations,
@@ -66,7 +63,7 @@ module ValidationReflection # :nodoc:
 
     # Returns an array of MacroReflection objects for all validations in the class
     def reflect_on_all_validations
-      self.read_inheritable_attribute(:validations) || []
+      self.read_inheritable_attribute(:reflected_validations) || []
     end
 
     # Returns an array of MacroReflection objects for all validations defined for the field +attr_name+.
@@ -83,7 +80,7 @@ module ValidationReflection # :nodoc:
       def remember_validation_metadata(validation_type, *attr_names)
         configuration = attr_names.last.is_a?(::Hash) ? attr_names.pop : {}
         attr_names.flatten.each do |attr_name|
-          self.write_inheritable_array :validations,
+          self.write_inheritable_array :reflected_validations,
             [::ActiveRecord::Reflection::MacroReflection.new(validation_type, attr_name.to_sym, configuration, self)]
         end
       end
