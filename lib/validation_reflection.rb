@@ -76,7 +76,6 @@ module ActiveRecordExtensions # :nodoc:
         }, __FILE__, __LINE__
       end
     end
-    alias :reload :install
 
     module ClassMethods
 
