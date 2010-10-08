@@ -1,7 +1,7 @@
 Validation Reflection
 =====================
 
-Version 0.3.8, 2010-07-30
+Version 1.0.0, 2010-10-08
 
 This plugin adds reflective access to validations
 
@@ -31,9 +31,9 @@ ActiveRecord::Reflection::MacroReflection. For example
 
 Usually, all the standard Rails validations are reflected.
 You can change this -- add or remove validations -- in an
-application-specific configuration file, 
+application-specific initializer, 
 
-  config/plugins/validation_reflection.rb
+  config/initializers/validation_reflection.rb
 
 In that file change config.reflected_validations to suit your
 needs. Say, you have a custom validation for email addresses,

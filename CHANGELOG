@@ -1,3 +1,12 @@
+== 1.0.0 2010-10-08
+* 1.0 release for Rails 3
+
+== 1.0.0-rc.1 2010-07-30
+* Fixed reload bug
+
+== 1.0.0-beta4 2010-06-12
+* Changed initialization to reflect new initialization in Rails 3.
+
 == 0.3.8 2010-07-30
 * Enhancement from Sutto:
   ** Fix reload bug
